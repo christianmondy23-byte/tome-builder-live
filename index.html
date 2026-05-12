@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tome: World Building Bible</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stone-dark: #120e0a;
+            --stone-panel: #1c1611;
+            --stone-recess: #0a0806;
+            --copper-border: #4a3620;
+            --gold-text: #e5c158;
+            --molten-glow: rgba(255, 120, 0, 0.5);
+            --carved-shadow: inset 3px 3px 8px rgba(0,0,0,0.9), inset -1px -1px 2px rgba(255,255,255,0.03);
+        }
+        body { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; background-color: var(--stone-dark); color: #bca082; }
+        h1, h2, h3, .font-magic { font-family: 'Cinzel Decorative', cursive; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.6); border-left: 1px solid var(--copper-border); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #5c452e; border-radius: 2px; border: 1px solid #7b5938; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #8b6742; }
+        .carved-input { background: var(--stone-recess); color: #d4a373; box-shadow: var(--carved-shadow); border: 1px solid #000; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); transition: all 0.4s ease; width: 100%; }
+        .carved-input:focus { background: #050403; color: #ffdf8c; outline: none; border-color: #8b5a2b; box-shadow: var(--carved-shadow), 0 0 15px var(--molten-glow); text-shadow: 0 0 8px rgba(255, 150, 50, 0.8); }
+        .carved-input:disabled { opacity: 0.7; cursor: not-allowed; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: var(--carved-shadow), 0 0 5px var(--molten-glow); } 50% { box-shadow: var(--carved-shadow), 0 0 20px var(--molten-glow); } }
+        .engraved-text { text-shadow: -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1); }
+        .molten-text { color: var(--gold-text); text-shadow: 0 0 10px rgba(255, 100, 0, 0.7), -1px -1px 1px rgba(0,0,0,0.9); }
+        .sidebar-open { transform: translateX(0); }
+        .sidebar-closed { transform: translateX(-100%); }
+        @media (min-width: 768px) { .sidebar-closed { transform: translateX(0); } }
+        .bg-tome { background-image: radial-gradient(circle at 20% 30%, #201812 0%, transparent 60%), radial-gradient(circle at 80% 80%, #1a120c 0%, transparent 60%); }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 8px; background: #e5c158; border: 1px solid #4a3620; cursor: pointer; box-shadow: 0 0 5px rgba(255,120,0,0.5); margin-top: -5px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #0a0806; border-radius: 2px; border: 1px solid #2c2015; }
+    </style>
+</head>
+<body class="flex h-screen bg-tome overflow-hidden relative selection:bg-amber-900 selection:text-amber-200">
+
+    <div class="pointer-events-none fixed inset-0 opacity-[0.25] mix-blend-overlay" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+
+    <button id="mobile-menu-btn" class="md:hidden fixed top-3 left-3 z-50 p-2 bg-[#120e0a] border border-[#4a3620] text-amber-500 rounded shadow-lg"><i data-lucide="menu" class="w-5 h-5"></i></button>
+
+    <div id="sidebar" class="sidebar-closed transition-transform duration-300 ease-in-out fixed md:relative z-50 md:z-40 h-full w-72 md:w-80 bg-[#16110d] border-r-4 border-[#2c2015] flex flex-col shadow-2xl shrink-0">
+        <div class="p-5 md:p-6 bg-[#0d0a07] border-b-2 border-[#2c2015] flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-[#e5c158] font-magic engraved-text">THE TOME</h1>
+                <p class="text-[10px] md:text-xs text-[#8b6742] uppercase tracking-[0.3em] font-sans font-bold">World Builder</p>
+                <p class="text-[8px] md:text-[9px] text-[#7b5938] mt-1.5 uppercase font-sans font-semibold">Created by Aliyyah Rae Publishing</p>
+            </div>
+            <button id="close-sidebar-btn" class="md:hidden text-[#8b6742] hover:text-amber-400 p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+
+        <div class="px-4 py-4 border-b-2 border-[#2c2015] bg-[#120e0a] flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span id="audio-section-label" class="text-[#8b6742] text-[9px] md:text-[10px] uppercase tracking-widest font-bold truncate pr-2">Rune: Geography</span>
+                <span id="audio-status" class="text-[#a3805b] text-[9px] md:text-[10px] font-sans shrink-0">Ready</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="btn-play-pause" class="text-[#5c452e] hover:text-amber-500 transition-colors"><i data-lucide="play" id="play-icon" class="w-5 h-5"></i><i data-lucide="pause" id="pause-icon" class="hidden w-5 h-5"></i></button>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" class="w-full">
+            </div>
+            <audio id="bg-audio" loop></audio>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-3 custom-scrollbar">
+            <nav id="nav-container" class="px-3 space-y-1"></nav>
+        </div>
+
+        <div class="p-4 border-t-2 border-[#2c2015] bg-[#0d0a07] space-y-2">
+            <button id="btn-save" class="w-full flex items-center justify-center gap-2 py-2 md:py-3 bg-[#1c1611] border border-[#4a3620] text-amber-500 text-xs md:text-sm font-bold uppercase"><i data-lucide="hammer" class="w-4 h-4"></i> Etch <span class="hidden md:inline">into Stone</span></button>
+            <button id="btn-load" class="w-full flex items-center justify-center gap-2 py-2 md:py-3 bg-[#1c1611] border border-[#4a3620] text-amber-500 text-xs md:text-sm font-bold uppercase"><i data-lucide="book-open" class="w-4 h-4"></i> Read <span class="hidden md:inline">from Stone</span></button>
+            <input type="file" id="file-input" accept=".json" class="hidden">
+            <button id="btn-export" class="w-full flex items-center justify-center gap-2 py-2 md:py-3 bg-amber-900 border border-amber-600 text-amber-100 text-xs md:text-sm font-bold uppercase"><i data-lucide="scroll" class="w-4 h-4"></i> Manifest <span class="hidden md:inline">Tome</span></button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER FIX: Added min-w-0 and w-full to prevent horizontal flexbox blowout -->
+    <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative w-full">
+        <header class="bg-[#1c1611]/80 border-b-2 border-[#2c2015] px-4 md:px-8 py-5 md:py-8 shrink-0 pl-14 md:pl-12 shadow-xl w-full">
+            <h2 id="header-title" class="text-3xl md:text-5xl font-magic text-[#e5c158] molten-text break-words"></h2>
+            <p id="header-desc" class="text-[#a3805b] mt-2 text-sm md:text-lg italic font-serif leading-snug break-words"></p>
+        </header>
+
+        <main id="main-scroll" class="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-10 custom-scrollbar pb-32 w-full">
+            <div id="subsections-container" class="max-w-4xl mx-auto space-y-8 md:space-y-12 w-full"></div>
+        </main>
+    </div>
+
+    <script>
+        // --- AI ORACLE LOGIC ---
+        async function divinateLore(fieldLabel, fieldId) {
+            const textarea = document.querySelector(`textarea[data-id="${fieldId}"]`);
+            if (!textarea) return;
+            const currentText = textarea.value;
+            const originalVal = currentText;
+            textarea.value = "The Oracle is scrying the weave of reality...";
+            textarea.disabled = true;
+
+            const userQuery = currentText.trim() === "" 
+                ? `You are a master world-builder. Create an original and epic 3-4 sentence lore entry for the category "${fieldLabel}". Raw lore only, legendary tone.`
+                : `You are a master world-builder. Expand these rough notes for "${fieldLabel}" into a legendary 3-4 sentence lore entry: ${currentText}`;
+
+            try {
+                // Securely call our hidden backend instead of Google directly!
+                const response = await fetch('/.netlify/functions/oracle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userQuery })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.error || "Connection failed");
+                
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                    textarea.value = text.trim();
+                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                } else { textarea.value = originalVal; }
+            } catch (error) {
+                textarea.value = originalVal;
+                alert(`Oracle connection severed: ${error.message}`);
+            }
+            textarea.disabled = false;
+        }
+
+        // --- FULL BIBLE SCHEMA ---
+        const BIBLE_OUTLINE = [
+            { id: "geo", title: "I. Geography", icon: "globe", audioPath: "./audio/geography.mp3", description: "Establish the physical landscape, celestial positioning, climate, and foundational resources.", subsections: [
+                { id: "geo_a", title: "A. Planet/World Overview", fields: [
+                    { id: "geo_a_name", label: "Name of World", placeholder: "The official name(s)." },
+                    { id: "geo_a_star", label: "Star System", placeholder: "Name of star(s), number, other bodies." },
+                    { id: "geo_a_orbit", label: "Orbital Characteristics", placeholder: "Day/Year length, tilt, eccentricity." },
+                    { id: "geo_a_size", label: "Size and Mass", placeholder: "Diameter, Gravity, impact on life." },
+                    { id: "geo_a_atmos", label: "Atmosphere", placeholder: "Composition, sky color, phenomena." },
+                    { id: "geo_a_mag", label: "Magnetic Field", placeholder: "Strength, protection." }
+                ]},
+                { id: "geo_b", title: "B. Continents and Landmasses", fields: [
+                    { id: "geo_b_names", label: "Names", placeholder: "Names of landmasses." },
+                    { id: "geo_b_shapes", label: "Shapes and Sizes", placeholder: "Outlines, archipelagos." },
+                    { id: "geo_b_place", label: "Placement", placeholder: "Arrangement relative to each other." },
+                    { id: "geo_b_feat", label: "Unique Features", placeholder: "Deserts, ice, defining traits." }
+                ]},
+                { id: "geo_c", title: "C. Oceans & Water Bodies", fields: [
+                    { id: "geo_c_names", label: "Names", placeholder: "Oceans, seas, lakes, rivers." },
+                    { id: "geo_c_depth", label: "Sizes and Depths", placeholder: "Scale and depth." },
+                    { id: "geo_c_curr", label: "Currents", placeholder: "Impact on climate and travel." },
+                    { id: "geo_c_sal", label: "Salinity", placeholder: "Salt, fresh, or unique?" },
+                    { id: "geo_c_ufeat", label: "Unique Features", placeholder: "Underwater topography, bioluminescence." }
+                ]},
+                { id: "geo_d", title: "D. Climate & Biomes", fields: [
+                    { id: "geo_d_pat", label: "Global Patterns", placeholder: "Wind, rain, overall climate." },
+                    { id: "geo_d_zones", label: "Major Climate Zones", placeholder: "Tropical, polar, temperate." },
+                    { id: "geo_d_bio", label: "Standard Biomes", placeholder: "Forests, deserts, mountains." },
+                    { id: "geo_d_ubio", label: "Unique Biomes", placeholder: "Floating islands, crystal caves." }
+                ]},
+                { id: "geo_e", title: "E. Topography", fields: [
+                    { id: "geo_e_mnt", label: "Mountain Ranges", placeholder: "Characteristics and names." },
+                    { id: "geo_e_val", label: "Valleys & Plateaus", placeholder: "Canyons and plains." },
+                    { id: "geo_e_volc", label: "Volcanoes", placeholder: "Geothermal activity." },
+                    { id: "geo_e_coast", label: "Coastlines", placeholder: "Cliffed, marshy, islands." },
+                    { id: "geo_e_caves", label: "Caves & Underground", placeholder: "Systems and geo features." }
+                ]},
+                { id: "geo_f", title: "F. Natural Resources", fields: [
+                    { id: "geo_f_types", label: "Resource Types", placeholder: "Metals, magic elements, fertile land." },
+                    { id: "geo_f_scar", label: "Abundance/Scarcity", placeholder: "How it impacts power and trade." }
+                ]}
+            ]},
+            { id: "hist", title: "II. History", icon: "book-open", audioPath: "./audio/history.mp3", description: "Origins, eras, and major developments.", subsections: [
+                { id: "hist_a", title: "A. Origins", fields: [
+                    { id: "hist_a_myth", label: "Creation Myth/Theory", placeholder: "How it began." },
+                    { id: "hist_a_early", label: "Early Epochs", placeholder: "Formation and first life." }
+                ]},
+                { id: "hist_b", title: "B. Ancient Eras", fields: [
+                    { id: "hist_b_life", label: "Sentience", placeholder: "Emergence of first species." },
+                    { id: "hist_b_civ", label: "Ancient Empires", placeholder: "Rise and fall of old powers." },
+                    { id: "hist_b_dis", label: "Cataclysms", placeholder: "Ancient disasters." }
+                ]},
+                { id: "hist_c", title: "C. Middle Eras", fields: [
+                    { id: "hist_c_soc", label: "Complex Societies", placeholder: "Growth, nations, Golden Ages." },
+                    { id: "hist_c_war", label: "Historical Wars", placeholder: "Conflicts and old feuds." }
+                ]},
+                { id: "hist_d", title: "D. Modern Eras", fields: [
+                    { id: "hist_d_rev", label: "Revolutions", placeholder: "Societal upheavals." },
+                    { id: "hist_d_entities", label: "Political Entities", placeholder: "Formation of current nations." }
+                ]},
+                { id: "hist_e", title: "E. Current Events", fields: [
+                    { id: "hist_e_now", label: "The Present Day", placeholder: "Immediate context and mood." },
+                    { id: "hist_e_pro", label: "Prophecies/Omens", placeholder: "Manifesting signs." }
+                ]},
+                { id: "hist_f", title: "F. Timekeeping", fields: [
+                    { id: "hist_f_sys", label: "Dating System", placeholder: "Years, Eras, Ages." }
+                ]}
+            ]},
+            { id: "cult", title: "III. Cultures & Societies", icon: "users", audioPath: "./audio/cultures.mp3", description: "Species, social structures, and traditions.", subsections: [
+                { id: "cult_a", title: "A. Races/Species", fields: [
+                    { id: "cult_a_name", label: "Species Info", placeholder: "Name, appearance, biology." },
+                    { id: "cult_a_psych", label: "Psychology", placeholder: "Common traits and tendencies." },
+                    { id: "cult_a_rel", label: "Relations", placeholder: "Historical interactions." }
+                ]},
+                { id: "cult_b", title: "B. Major Factions", fields: [
+                    { id: "cult_b_name", label: "Culture Name", placeholder: "Identity and territory." },
+                    { id: "cult_b_gov", label: "Government", placeholder: "Political offices and laws." },
+                    { id: "cult_b_soc", label: "Social Hierarchy", placeholder: "Classes, roles, family." },
+                    { id: "cult_b_econ", label: "Economy & Mil", placeholder: "Industries, trade, military." },
+                    { id: "cult_b_life", label: "Daily Life", placeholder: "Housing, fashion, food, hobbies." }
+                ]},
+                { id: "cult_c", title: "C. Religion", fields: [
+                    { id: "cult_c_gods", label: "Faith & Spirits", placeholder: "Worship, myths, sacred texts." },
+                    { id: "cult_c_prac", label: "Practices", placeholder: "Rituals, holidays, impact." }
+                ]},
+                { id: "cult_d", title: "D. Communication", fields: [
+                    { id: "cult_d_lang", label: "Languages", placeholder: "Spoken, written, dialects." },
+                    { id: "cult_d_meth", label: "Methods", placeholder: "Magic or tech communication." }
+                ]},
+                { id: "cult_e", title: "E. Art & Tradition", fields: [
+                    { id: "cult_e_forms", label: "Art Forms", placeholder: "Music, festivals, folklore." },
+                    { id: "cult_e_dress", label: "Style", placeholder: "Clothing, adornment, cuisine." }
+                ]}
+            ]},
+            { id: "magic", title: "IV. Magic & Tech", icon: "zap", audioPath: "./audio/magic.mp3", description: "Wielding supernatural or advanced forces.", subsections: [
+                { id: "magic_a", title: "A. Principles", fields: [
+                    { id: "magic_a_src", label: "The Source", placeholder: "Fundamental laws, costs, interaction." }
+                ]},
+                { id: "magic_b", title: "B. Branches", fields: [
+                    { id: "magic_b_cat", label: "Categorization", placeholder: "Schools, sub-disciplines." }
+                ]},
+                { id: "magic_c", title: "C. Users", fields: [
+                    { id: "magic_c_stat", label: "Social Standing", placeholder: "Who uses it, education, organizations." }
+                ]},
+                { id: "magic_d", title: "D. Artifacts", fields: [
+                    { id: "magic_d_cre", label: "Creation", placeholder: "Items, devices, scarcity." }
+                ]},
+                { id: "magic_e", title: "E. Metaphysics", fields: [
+                    { id: "magic_e_soul", label: "The Soul", placeholder: "Planes, afterlife, cosmic entities." }
+                ]}
+            ]},
+            { id: "flora", title: "V. Flora & Fauna", icon: "tree-pine", audioPath: "./audio/flora.mp3", description: "Plant and animal life.", subsections: [
+                { id: "flora_a", title: "A. Ecosystems", fields: [
+                    { id: "flora_a_web", label: "Food Webs", placeholder: "Symbiosis and predatory dynamics." }
+                ]},
+                { id: "flora_b", title: "B. Flora", fields: [
+                    { id: "flora_b_com", label: "Plant Species", placeholder: "Common, unique, agricultural." }
+                ]},
+                { id: "flora_c", title: "C. Fauna", fields: [
+                    { id: "flora_c_com", label: "Animal Species", placeholder: "Common, exotic, sentient, domestic." }
+                ]},
+                { id: "flora_d", title: "D. Phenomena", fields: [
+                    { id: "flora_d_adap", label: "Adaptations", placeholder: "Extreme conditions, disease." }
+                ]}
+            ]},
+            { id: "state", title: "VI. Current State", icon: "flag", audioPath: "./audio/politics.mp3", description: "Global political and social climate.", subsections: [
+                { id: "state_a", title: "A. Political Landscape", fields: [
+                    { id: "state_a_powers", label: "Global Powers", placeholder: "Dominant nations and alliances." }
+                ]},
+                { id: "state_b", title: "B. Conflicts", fields: [
+                    { id: "state_b_war", label: "Active Wars", placeholder: "Disputes, internal strife, threats." }
+                ]},
+                { id: "state_c", title: "C. Key Factions", fields: [
+                    { id: "state_c_org", label: "Orgs", placeholder: "Goals, resources, relations." }
+                ]},
+                { id: "state_d", title: "D. Economy", fields: [
+                    { id: "state_d_rte", label: "Trade Routes", placeholder: "Industries, resource distribution." }
+                ]},
+                { id: "state_e", title: "E. Social Climate", fields: [
+                    { id: "state_e_soc", label: "Social Issues", placeholder: "Movements, mood, history impact." }
+                ]}
+            ]},
+            { id: "locs", title: "VII. Notable Locations", icon: "map-pin", audioPath: "./audio/locations.mp3", description: "Capitals, ruins, and wonders.", subsections: [
+                { id: "locs_a", title: "A. Key Sites", fields: [
+                    { id: "locs_a_cap", label: "Political Hubs", placeholder: "Capitals, districts." },
+                    { id: "locs_a_trade", label: "Trade Ports", placeholder: "Commerce significance." },
+                    { id: "locs_a_fort", label: "Fortifications", placeholder: "Chokepoints, defenses." },
+                    { id: "locs_a_holy", label: "Sacred Sites", placeholder: "Temples, pilgrimage." },
+                    { id: "locs_a_ruin", label: "Historical Ruins", placeholder: "Ancient remains, secrets." },
+                    { id: "locs_a_won", label: "Natural Wonders", placeholder: "Unique geo features." },
+                    { id: "locs_a_inf", label: "Danger Zones", placeholder: "Infamy, reputation." }
+                ]}
+            ]},
+            { id: "names", title: "VIII. Naming", icon: "type", audioPath: "./audio/names.mp3", description: "Naming conventions and patterns.", subsections: [
+                { id: "names_a", title: "A. Conventions", fields: [
+                    { id: "names_a_pers", label: "Personal Names", placeholder: "Structure, style, honorifics." },
+                    { id: "names_a_place", label: "Place Names", placeholder: "Linguistic roots, history." },
+                    { id: "names_a_fac", label: "Faction Names", placeholder: "Symbolic, direct." },
+                    { id: "names_a_nat", label: "Natural Names", placeholder: "Creatures, plants." }
+                ]}
+            ]},
+            { id: "time", title: "IX. Timekeeping", icon: "calendar", audioPath: "./audio/time.mp3", description: "Calendars and seasons.", subsections: [
+                { id: "time_a", title: "A. Clocks", fields: [
+                    { id: "time_a_day", label: "Days & Months", placeholder: "Units, cycles, holidays." },
+                    { id: "time_a_eras", label: "Eras", placeholder: "Dating system, age names." },
+                    { id: "time_a_seas", label: "Seasons", placeholder: "Variation, length, impact." }
+                ]}
+            ]},
+            { id: "lore", title: "X. Common Knowledge", icon: "eye", audioPath: "./audio/lore.mp3", description: "Folklore and superstitions.", subsections: [
+                { id: "lore_a", title: "A. Beliefs", fields: [
+                    { id: "lore_a_geo", label: "World Knowledge", placeholder: "History and geography basics." },
+                    { id: "lore_a_myth", label: "Folklore", placeholder: "Legends, boogeymen." },
+                    { id: "lore_a_luck", label: "Superstitions", placeholder: "Luck, omens, taboos." },
+                    { id: "lore_a_prov", label: "Sayings", placeholder: "Proverbs, common wisdom." },
+                    { id: "lore_a_prej", label: "Stereotypes", placeholder: "Prejudices between groups." }
+                ]}
+            ]},
+            { id: "law", title: "XI. Law & Justice", icon: "scale", audioPath: "./audio/law.mp3", description: "Legal systems and crime.", subsections: [
+                { id: "law_a", title: "A. Legal Systems", fields: [
+                    { id: "law_a_gov", label: "Structure", placeholder: "Head of State, local governance." },
+                    { id: "law_a_code", label: "Codes", placeholder: "Sources, prohibitions, punishments." },
+                    { id: "law_a_enf", label: "Justice", placeholder: "Enforcement, courts, prisons." },
+                    { id: "law_a_dip", label: "Diplomacy", placeholder: "Treaties, alliances, espionage." },
+                    { id: "law_a_crime", label: "Underworld", placeholder: "Syndicates, illegal acts." }
+                ]}
+            ]},
+            { id: "trans", title: "XII. Transportation", icon: "navigation", audioPath: "./audio/transport.mp3", description: "Moving people and info.", subsections: [
+                { id: "trans_a", title: "A. Travel", fields: [
+                    { id: "trans_a_mode", label: "Modes", placeholder: "Land, water, air, unique." },
+                    { id: "trans_a_inf", label: "Infrastructure", placeholder: "Roads, lanes, security." },
+                    { id: "trans_a_meth", label: "Communication", placeholder: "Methods, hubs, censorship." }
+                ]}
+            ]},
+            { id: "econ", title: "XIII. Economy", icon: "coins", audioPath: "./audio/economy.mp3", description: "Wealth, trade, and finance.", subsections: [
+                { id: "econ_a", title: "A. Wealth", fields: [
+                    { id: "econ_a_phil", label: "Philosophies", placeholder: "Economic models, stability." },
+                    { id: "econ_a_cur", label: "Valuation", placeholder: "Currency, costs, barter." },
+                    { id: "econ_a_ind", label: "Production", placeholder: "Industries, trade routes." },
+                    { id: "econ_a_prof", label: "Services", placeholder: "Professions, labor, banking." }
+                ]}
+            ]},
+            { id: "main_chars", title: "XIV. Main Characters", icon: "user-circle", audioPath: "./audio/main_chars.mp3", description: "Protagonists and antagonists.", dynamic: true, countKey: "mc_count", defaultCount: 1, templateTitle: "Main Character", templateFields: [
+                { id: "id", label: "Core Identity", placeholder: "Name, titles, race, appearance." },
+                { id: "back", label: "Background", placeholder: "Origin, past events, training." },
+                { id: "role", label: "World Role", placeholder: "Status, goals, conflicts." },
+                { id: "abil", label: "Abilities", placeholder: "Skills, items, resources." },
+                { id: "perc", label: "Perception", placeholder: "Public image vs. reality." }
+            ]},
+            { id: "minor_chars", title: "XV. Minor Characters", icon: "users", audioPath: "./audio/minor_chars.mp3", description: "Supporting cast and archetypes.", dynamic: true, countKey: "minor_count", defaultCount: 1, templateTitle: "Minor Character", templateFields: [
+                { id: "arch", label: "Archetype", placeholder: "Role, function, significance." },
+                { id: "id", label: "Identity", placeholder: "Name, style, affiliations." },
+                { id: "back", label: "Background", placeholder: "Status, traits, motivation." },
+                { id: "plot", label: "Plot Hook", placeholder: "Relationship to main story." }
+            ]},
+            { id: "plot", title: "XVI. Plot Hooks", icon: "sparkles", audioPath: "./audio/plot.mp3", description: "Tensions, mysteries, and threats.", subsections: [
+                { id: "plot_a", title: "A. Story Engines", fields: [
+                    { id: "plot_a_hist", label: "Historical Issues", placeholder: "Grievances, artifacts." },
+                    { id: "plot_a_soc", label: "Societal Tensions", placeholder: "Scarcity, ideology, class." },
+                    { id: "plot_a_env", label: "Planetary", placeholder: "Disasters, phenomena." },
+                    { id: "plot_a_thr", label: "External Threats", placeholder: "Invaders, rogue elements." },
+                    { id: "plot_a_mys", label: "Mysteries", placeholder: "Unanswered questions." }
+                ]}
+            ]}
+        ];
+
+        let activeSectionId = BIBLE_OUTLINE[0].id;
+        let worldData = {};
+        let isSidebarOpen = false; 
+        let wantsToPlay = true;
+
+        const sidebarEl = document.getElementById('sidebar');
+        const navContainer = document.getElementById('nav-container');
+        const headerTitle = document.getElementById('header-title');
+        const headerDesc = document.getElementById('header-desc');
+        const subsectionsContainer = document.getElementById('subsections-container');
+        const mainScroll = document.getElementById('main-scroll');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const fileInput = document.getElementById('file-input');
+        const btnPlayPause = document.getElementById('btn-play-pause');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const volumeSlider = document.getElementById('volume-slider');
+        const bgAudio = document.getElementById('bg-audio');
+        const audioSectionLabel = document.getElementById('audio-section-label');
+        const audioStatus = document.getElementById('audio-status');
+
+        function init() {
+            const saved = localStorage.getItem('grimoireWorldDataV2');
+            if (saved) { try { worldData = JSON.parse(saved); } catch (e) { console.error(e); } }
+            bgAudio.volume = volumeSlider.value;
+            renderSidebar();
+            renderMainContent();
+            loadAudioForSection(activeSectionId);
+        }
+
+        function renderSidebar() {
+            navContainer.innerHTML = '';
+            BIBLE_OUTLINE.forEach(section => {
+                const isActive = activeSectionId === section.id;
+                const btn = document.createElement('button');
+                btn.className = `group w-full flex items-center px-4 py-3 mb-1 text-sm rounded transition-all ${isActive ? 'bg-[#18130e] text-[#e5c158] border border-[#5c452e]' : 'text-[#8b6742] hover:bg-[#1c1611]'}`;
+                btn.innerHTML = `<div class="flex items-center gap-3"><i data-lucide="${section.icon}" class="w-4 h-4 shrink-0"></i><span class="font-bold uppercase tracking-wide truncate">${section.title}</span></div>`;
+                btn.onclick = () => { if(activeSectionId !== section.id){ activeSectionId = section.id; renderSidebar(); renderMainContent(); loadAudioForSection(activeSectionId); if(window.innerWidth < 768) toggleSidebar(false); }};
+                navContainer.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        function renderMainContent() {
+            const activeSection = BIBLE_OUTLINE.find(s => s.id === activeSectionId);
+            headerTitle.textContent = activeSection.title;
+            headerDesc.textContent = activeSection.description;
+            subsectionsContainer.innerHTML = '';
+
+            if (activeSection.dynamic) {
+                let count = parseInt(worldData[activeSection.countKey]) || activeSection.defaultCount;
+                for(let i=0; i<count; i++) {
+                    let fieldsHtml = '';
+                    activeSection.templateFields.forEach(f => {
+                        const fid = `${activeSection.id}_${i}_${f.id}`;
+                        // MOBILE FIX: Wrap labels and buttons properly on small screens
+                        fieldsHtml += `<div class="flex flex-col gap-2 w-full"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pl-1 gap-1 sm:gap-0"><label class="block text-[#a3805b] font-bold uppercase text-[0.75rem] md:text-[0.8rem] engraved-text break-words">${f.label}</label><button onclick="divinateLore('${f.label.replace(/'/g, "\\'")}', '${fid}')" class="text-amber-600 text-[10px] uppercase font-bold hover:text-amber-400 flex items-center shrink-0"><i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>Consult Oracle</button></div><textarea data-id="${fid}" class="carved-input p-3 sm:p-4 rounded text-[1rem] sm:text-[1.15rem] font-serif min-h-[90px] w-full">${worldData[fid]||''}</textarea></div>`;
+                    });
+                    const div = document.createElement('div');
+                    div.className = "bg-[#1c1611] rounded border-2 border-[#2c2015] p-4 sm:p-6 space-y-6 shadow-xl relative w-full overflow-hidden";
+                    div.innerHTML = `<button onclick="removeDynamic('${activeSection.id}', ${i})" class="absolute top-4 right-4 text-red-900/50 hover:text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></button><div class="absolute top-0 left-0 w-2 h-full bg-amber-600"></div><h3 class="text-xl sm:text-2xl text-[#d4a373] engraved-text pr-8 break-words">${activeSection.templateTitle} ${i+1}</h3>${fieldsHtml}`;
+                    subsectionsContainer.appendChild(div);
+                }
+                const addBtn = document.createElement('button');
+                addBtn.className = "w-full py-4 sm:py-5 border-2 border-dashed border-[#4a3620] text-[#8b6742] bg-[#120e0a] font-magic text-lg sm:text-xl uppercase hover:border-amber-600 hover:text-amber-500 transition-all break-words";
+                addBtn.innerHTML = `Carve Another ${activeSection.templateTitle}`;
+                addBtn.onclick = () => { worldData[activeSection.countKey] = count + 1; localStorage.setItem('grimoireWorldDataV2', JSON.stringify(worldData)); renderMainContent(); lucide.createIcons(); };
+                subsectionsContainer.appendChild(addBtn);
+            } else {
+                activeSection.subsections.forEach(sub => {
+                    let fieldsHtml = '';
+                    sub.fields.forEach(f => {
+                        // MOBILE FIX: Wrap labels and buttons properly on small screens
+                        fieldsHtml += `<div class="flex flex-col gap-2 w-full"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pl-1 gap-1 sm:gap-0"><label class="block text-[#a3805b] font-bold uppercase text-[0.75rem] md:text-[0.8rem] engraved-text break-words">${f.label}</label><button onclick="divinateLore('${f.label.replace(/'/g, "\\'")}', '${f.id}')" class="text-amber-600 text-[10px] uppercase font-bold hover:text-amber-400 flex items-center shrink-0"><i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>Consult Oracle</button></div><textarea data-id="${f.id}" class="carved-input p-3 sm:p-4 rounded text-[1rem] sm:text-[1.15rem] font-serif min-h-[90px] w-full">${worldData[f.id]||''}</textarea></div>`;
+                    });
+                    const div = document.createElement('div');
+                    div.className = "bg-[#1c1611] rounded border-2 border-[#2c2015] p-4 sm:p-6 space-y-6 shadow-xl relative w-full overflow-hidden";
+                    div.innerHTML = `<div class="absolute top-0 left-0 w-2 h-full bg-amber-600"></div><h3 class="text-xl sm:text-2xl text-[#d4a373] engraved-text break-words pr-2">${sub.title}</h3>${fieldsHtml}`;
+                    subsectionsContainer.appendChild(div);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function loadAudioForSection(sectionId) {
+            const section = BIBLE_OUTLINE.find(s => s.id === sectionId);
+            audioSectionLabel.innerHTML = `Rune: ${section.title.split('. ')[1] || section.title}`;
+            if (section.audioPath) {
+                bgAudio.src = section.audioPath;
+                btnPlayPause.disabled = false;
+                if (wantsToPlay) {
+                    bgAudio.play().then(() => { 
+                        playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); audioStatus.textContent = "Resonating"; 
+                    }).catch(() => {
+                        playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); audioStatus.textContent = "Click to Awaken";
+                        const unlock = () => { if(wantsToPlay) bgAudio.play().then(() => { playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); audioStatus.textContent = "Resonating"; }); document.removeEventListener('click', unlock); };
+                        document.addEventListener('click', unlock, {once: true});
+                    });
+                }
+            }
+        }
+
+        function toggleSidebar(open) { isSidebarOpen = open; if(open) { sidebarEl.classList.remove('sidebar-closed'); sidebarEl.classList.add('sidebar-open'); } else { sidebarEl.classList.remove('sidebar-open'); sidebarEl.classList.add('sidebar-closed'); } }
+        mobileMenuBtn.onclick = () => toggleSidebar(true);
+        window.onclick = (e) => { if (isSidebarOpen && !sidebarEl.contains(e.target) && !mobileMenuBtn.contains(e.target)) toggleSidebar(false); };
+
+        window.removeDynamic = function(sectionId, index) {
+            if(!confirm("Are you sure you want to shatter this rune? The lore will be lost forever.")) return;
+            const s = BIBLE_OUTLINE.find(x => x.id === sectionId);
+            let count = parseInt(worldData[s.countKey]) || 1;
+            if(count <= 1) return;
+            for(let i=index; i<count-1; i++) { s.templateFields.forEach(f => { worldData[`${sectionId}_${i}_${f.id}`] = worldData[`${sectionId}_${i+1}_${f.id}`]; }); }
+            s.templateFields.forEach(f => delete worldData[`${sectionId}_${count-1}_${f.id}`]);
+            worldData[s.countKey] = count - 1;
+            localStorage.setItem('grimoireWorldDataV2', JSON.stringify(worldData));
+            renderMainContent();
+        };
+
+        mainScroll.addEventListener('input', (e) => { if(e.target.tagName==='TEXTAREA'){ worldData[e.target.dataset.id] = e.target.value; localStorage.setItem('grimoireWorldDataV2', JSON.stringify(worldData)); }});
+        btnPlayPause.addEventListener('click', () => { if(bgAudio.paused){ wantsToPlay=true; bgAudio.play(); playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); audioStatus.textContent="Resonating"; } else { wantsToPlay=false; bgAudio.pause(); pauseIcon.classList.add('hidden'); playIcon.classList.remove('hidden'); audioStatus.textContent="Hushed"; }});
+        volumeSlider.addEventListener('input', (e) => bgAudio.volume = e.target.value);
+        document.getElementById('btn-save').onclick = () => { const blob = new Blob([JSON.stringify(worldData,null,2)], {type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="Tome_Backup.json"; a.click(); };
+        document.getElementById('btn-load').onclick = () => fileInput.click();
+        fileInput.onchange = (e) => { const f=e.target.files[0]; const r=new FileReader(); r.onload=(ev)=>{ worldData=JSON.parse(ev.target.result); localStorage.setItem('grimoireWorldDataV2', JSON.stringify(worldData)); renderSidebar(); renderMainContent(); }; r.readAsText(f); };
+
+        init();
+    </script>
+</body>
+</html>
