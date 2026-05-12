@@ -78,7 +78,6 @@
         </div>
     </div>
 
-    <!-- MAIN CONTAINER FIX: Added min-w-0 and w-full to prevent horizontal flexbox blowout -->
     <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative w-full">
         <header class="bg-[#1c1611]/80 border-b-2 border-[#2c2015] px-4 md:px-8 py-5 md:py-8 shrink-0 pl-14 md:pl-12 shadow-xl w-full">
             <h2 id="header-title" class="text-3xl md:text-5xl font-magic text-[#e5c158] molten-text break-words"></h2>
@@ -105,22 +104,34 @@
                 : `You are a master world-builder. Expand these rough notes for "${fieldLabel}" into a legendary 3-4 sentence lore entry: ${currentText}`;
 
             try {
-                // Securely call our hidden backend instead of Google directly!
                 const response = await fetch('/.netlify/functions/oracle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userQuery })
                 });
                 
-                const data = await response.json();
+                // Read the raw text first so we can see exact server errors
+                const rawText = await response.text();
                 
-                if (!response.ok) throw new Error(data.error || "Connection failed");
+                if (!rawText) {
+                    throw new Error("The server returned an empty void. The Oracle is silent.");
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch(e) {
+                    throw new Error("Server glitch! Netlify says: " + rawText.substring(0, 100));
+                }
+
+                if (!response.ok) throw new Error(data.error?.message || data.error || "Connection failed");
                 
                 const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (text) {
                     textarea.value = text.trim();
                     textarea.dispatchEvent(new Event('input', { bubbles: true }));
                 } else { textarea.value = originalVal; }
+
             } catch (error) {
                 textarea.value = originalVal;
                 alert(`Oracle connection severed: ${error.message}`);
@@ -408,7 +419,6 @@
                     let fieldsHtml = '';
                     activeSection.templateFields.forEach(f => {
                         const fid = `${activeSection.id}_${i}_${f.id}`;
-                        // MOBILE FIX: Wrap labels and buttons properly on small screens
                         fieldsHtml += `<div class="flex flex-col gap-2 w-full"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pl-1 gap-1 sm:gap-0"><label class="block text-[#a3805b] font-bold uppercase text-[0.75rem] md:text-[0.8rem] engraved-text break-words">${f.label}</label><button onclick="divinateLore('${f.label.replace(/'/g, "\\'")}', '${fid}')" class="text-amber-600 text-[10px] uppercase font-bold hover:text-amber-400 flex items-center shrink-0"><i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>Consult Oracle</button></div><textarea data-id="${fid}" class="carved-input p-3 sm:p-4 rounded text-[1rem] sm:text-[1.15rem] font-serif min-h-[90px] w-full">${worldData[fid]||''}</textarea></div>`;
                     });
                     const div = document.createElement('div');
@@ -425,7 +435,6 @@
                 activeSection.subsections.forEach(sub => {
                     let fieldsHtml = '';
                     sub.fields.forEach(f => {
-                        // MOBILE FIX: Wrap labels and buttons properly on small screens
                         fieldsHtml += `<div class="flex flex-col gap-2 w-full"><div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pl-1 gap-1 sm:gap-0"><label class="block text-[#a3805b] font-bold uppercase text-[0.75rem] md:text-[0.8rem] engraved-text break-words">${f.label}</label><button onclick="divinateLore('${f.label.replace(/'/g, "\\'")}', '${f.id}')" class="text-amber-600 text-[10px] uppercase font-bold hover:text-amber-400 flex items-center shrink-0"><i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>Consult Oracle</button></div><textarea data-id="${f.id}" class="carved-input p-3 sm:p-4 rounded text-[1rem] sm:text-[1.15rem] font-serif min-h-[90px] w-full">${worldData[f.id]||''}</textarea></div>`;
                     });
                     const div = document.createElement('div');

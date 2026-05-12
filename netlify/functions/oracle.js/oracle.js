@@ -1,3 +1,5 @@
+const https = require('https');
+
 exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
@@ -8,47 +10,54 @@ exports.handler = async function(event, context) {
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            return { 
-                statusCode: 500, 
-                body: JSON.stringify({ error: 'Rune Key (API_KEY) not found in Netlify settings.' }) 
+            return {
+                statusCode: 500,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ error: 'Rune Key (GEMINI_API_KEY) not found in Netlify settings.' })
             };
         }
 
-        const payload = {
+        const payload = JSON.stringify({
             contents: [{ parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: "You are an ancient Oracle bound to a Tome, helping a creator build a universe. Respond only with beautifully written lore. Speak in an epic, legendary tone." }] }
-        };
-
-        // Using the stable "latest" endpoint
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
+        const options = {
+            hostname: 'generativelanguage.googleapis.com',
+            path: `/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload)
+            }
+        };
 
-        if (data.error) {
-            return {
-                statusCode: 400,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ error: data.error.message })
-            };
-        }
+        // A bulletproof, old-school way to fetch data that works on ANY Netlify server
+        const data = await new Promise((resolve, reject) => {
+            const req = https.request(options, (res) => {
+                const chunks = [];
+                res.on('data', (chunk) => chunks.push(chunk));
+                res.on('end', () => resolve({
+                    status: res.statusCode,
+                    body: Buffer.concat(chunks).toString('utf8')
+                }));
+            });
+            req.on('error', (e) => reject(e));
+            req.write(payload);
+            req.end();
+        });
 
         return {
-            statusCode: 200,
+            statusCode: data.status,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            body: data.body
         };
-        
+
     } catch (error) {
-        return { 
-            statusCode: 500, 
+        return {
+            statusCode: 500,
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ error: "The Oracle ritual failed: " + error.message }) 
+            body: JSON.stringify({ error: "The Oracle ritual failed: " + error.message })
         };
     }
 };
