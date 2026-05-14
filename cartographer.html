@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cartographer's Study</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --stone-dark: #120e0a;
+            --stone-panel: #1c1611;
+            --copper-border: #4a3620;
+            --gold-text: #e5c158;
+            --carved-shadow: inset 3px 3px 8px rgba(0,0,0,0.9), inset -1px -1px 2px rgba(255,255,255,0.03);
+        }
+        body { font-family: 'Cormorant Garamond', serif; background-color: var(--stone-dark); color: #bca082; }
+        h1, h2, h3, .font-magic { font-family: 'Cinzel Decorative', cursive; }
+        .engraved-text { text-shadow: -1px -1px 1px rgba(0,0,0,0.9), 1px 1px 1px rgba(255,255,255,0.1); }
+        .molten-text { color: var(--gold-text); text-shadow: 0 0 10px rgba(255, 100, 0, 0.7), -1px -1px 1px rgba(0,0,0,0.9); }
+        .bg-tome { background-image: radial-gradient(circle at 20% 30%, #201812 0%, transparent 60%), radial-gradient(circle at 80% 80%, #1a120c 0%, transparent 60%); }
+    </style>
+</head>
+<body class="flex h-screen bg-tome overflow-hidden relative selection:bg-amber-900 selection:text-amber-200">
+
+    <div class="pointer-events-none fixed inset-0 opacity-[0.25] mix-blend-overlay" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E'); z-index: 0;"></div>
+
+    <div class="relative z-10 h-full w-80 bg-[#16110d] border-r-4 border-[#2c2015] flex flex-col shadow-2xl shrink-0 overflow-y-auto">
+        
+        <div class="p-6 bg-[#0d0a07] border-b-2 border-[#2c2015]">
+            <a href="index.html" class="inline-flex items-center gap-2 text-amber-600 hover:text-amber-400 font-bold uppercase text-xs tracking-widest transition-colors mb-4">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Return to Tome
+            </a>
+            <h1 class="text-3xl font-bold text-[#e5c158] font-magic engraved-text leading-tight">The Cartographer's Study</h1>
+            <p class="text-[10px] text-[#8b6742] mt-2 uppercase font-sans font-semibold">Aliyyah Rae Publishing</p>
+        </div>
+
+        <div class="p-6 border-b-2 border-[#2c2015] bg-[#120e0a]">
+            <p class="text-sm italic text-[#a3805b] leading-relaxed">
+                Use the magical canvas to the right to generate continents, paint biomes, and trace the rivers of your world. When your lands are shaped, save the parchment and record its details in your Tome.
+            </p>
+        </div>
+
+        <div class="p-6 flex-1 flex flex-col justify-center">
+            <div class="bg-[#1c1611] border border-amber-600 rounded-md p-5 shadow-[0_0_15px_rgba(255,120,0,0.15)] relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+                
+                <div class="flex justify-center mb-3">
+                    <i data-lucide="compass" class="w-8 h-8 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]"></i>
+                </div>
+                
+                <h3 class="text-center font-magic text-xl text-[#e5c158] molten-text mb-2">Commission the Master Cartographer</h3>
+                
+                <p class="text-sm text-[#bca082] text-center mb-5 leading-snug">
+                    Require a masterpiece? I forge cinematic, high-fidelity 3D world maps, custom globes, and architectural visualizations using Unreal Engine 5.
+                </p>
+                
+                <a href="#" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-amber-900 hover:bg-amber-800 border border-amber-500 text-amber-100 font-bold uppercase text-xs tracking-wide transition-all shadow-[0_0_10px_rgba(245,158,11,0.3)] hover:shadow-[0_0_15px_rgba(245,158,11,0.6)]">
+                    <i data-lucide="map" class="w-4 h-4"></i> Request Custom Map
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 h-full relative z-10 bg-black">
+        <iframe src="https://azgaar.github.io/Fantasy-Map-Generator/" class="w-full h-full border-none" title="Interactive Map Generator" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+```
+
+### Step 2: Add a Button to the Main Tome (`index.html`)
+Now we just need to give them a way to walk into the study! 
+
+Open your `index.html` file on your computer. Scroll down to line **101** (Right under where the "Manifest Tome" button is, at the bottom of the sidebar area). 
+
+Paste this new button code right below the Manifest button:
+
+```html
+<a href="cartographer.html" class="w-full flex items-center justify-center gap-2 py-2 md:py-3 mt-2 bg-[#0a0806] border border-amber-700 hover:border-amber-400 text-amber-600 hover:text-amber-400 text-xs md:text-sm font-bold uppercase transition-colors shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+    <i data-lucide="compass" class="w-4 h-4"></i> Enter Study
+</a>
